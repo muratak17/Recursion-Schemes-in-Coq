@@ -1,1 +1,1 @@
-**This repository is anonymatized for double-blind review.**
+**This repository is anonymzed for double-blind review.**
