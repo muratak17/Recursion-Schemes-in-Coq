@@ -187,3 +187,41 @@ Time Eval cbv in (fibo 20).
 (* Finished transaction in 0.034 secs (0.03u,0.s) *)
 (* Finished transaction in 0.04 secs (0.034u,0.s) *)
 (* Finished transaction in 0.039 secs (0.037u,0.s) *)
+
+Inductive maybe {C : Type} :=
+| Nothing : maybe
+| Just    : C -> maybe.
+
+Fixpoint midtree_nth_annotation (t : mid_tree) (n : nat)
+  := match n with
+     | O    => Just (epsilon t)
+     | S n' => match t with
+               | Nil _ => Nothing 
+               | Cons _ t' => midtree_nth_annotation t' n'
+               end
+     end.
+
+Notation "t !! n" := (midtree_nth_annotation t n) (at level 50).
+
+Fixpoint maximize {A : Type} (f : A -> nat) (l : list A) :=
+  match l with
+  | nil     => 0
+  | a :: l' => max (f a) (maximize f l') 
+  end.
+  
+Definition knapsack (wvs : list (nat * nat))
+  := {|
+      [fun _ => 0,
+       fun t => maximize (fun p => match p with
+                                               | (w,v) => match t !! (w - 1) with
+                                                          | Nothing => 0
+                                                          | Just a  => v + a
+                                                          end
+                                               end) wvs]
+    |}.
+
+Time Eval cbv in (knapsack ((12,4) :: (1,2) :: (2,2) :: (1,1) :: (4,10)
+                                   :: (14, 3) :: (21, 42) :: (11, 32) :: (10, 4) :: (5,3)
+                                   :: (22, 15) :: (52, 11) :: (19, 42) :: (41, 22) :: (55,11)
+                                   :: (104,12) :: (14, 53) :: (23, 42) :: (63, 32) :: (16, 22) :: nil) 100).
+(* => 36 *)
